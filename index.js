@@ -1,6 +1,6 @@
 const express = require('express');
 const cors = require('cors');
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const app = express();
 const port = process.env.PORT || 5000;
 
@@ -34,6 +34,52 @@ async function run() {
         const cursor = await servicesCollection.find().toArray();
         res.send(cursor);
     })
+
+
+    app.post('/addService', async (req, res) => {
+      const newService = req.body;
+      console.log(newService);
+      const result = await servicesCollection.insertOne(newService);
+      res.send(result);
+  })
+
+  // app.delete('/services/:id', async(req, res) => {
+  //   const id = req.params.id;
+  //   const query = { _id: id}
+  //   const result = await servicesCollection.deleteOne(query);
+  //   res.send(result);
+  // })
+
+  app.delete('/services/:id', async(req, res) => {
+    const id = req.params.id;
+    const query = { _id: new ObjectId(id)}
+    const result = await servicesCollection.deleteOne(query);
+    res.send(result);
+  })
+
+
+  app.get('/services/:id', async(req, res) => {
+    const id = req.params.id;
+    const query = { _id: new ObjectId(id)}
+    const result = await servicesCollection.findOne(query);
+    res.send(result);
+  })
+
+
+  app.put('/services/:id', async (req, res) => {
+    const id = req.params.id;
+    const filter = {_id: new ObjectId(id)}
+    const updatedService = req.body;
+    const service = {
+      $set: {
+        name: updatedService.name,
+        description: updatedService.description ,
+        price: updatedService.price
+      }
+    }
+    const result = await servicesCollection.updateOne(filter, service);
+    res.send(result);
+  })
 
     
 
